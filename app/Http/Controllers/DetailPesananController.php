@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-use App\DetailPesanan;
+use App\Models\DetailPesanan;
 use Validator;
 
 class DetailPesananController extends Controller
@@ -14,23 +14,52 @@ class DetailPesananController extends Controller
     public function getAll()
     {
         $detailPesanan = DB::table('detailpesanans')
-                            ->where('is_Deleted','LIKE','0')
-                            ->get();
+                            ->join('pesanans', 'detailpesanans.id_pesanan', '=', 'pesanans.id')
+                            ->join('menus', 'detailpesanans.id_menu', '=', 'menu.id')
+                            ->where('detailpesanans.is_Deleted','LIKE','0')
+                            ->get([
+                                'pesanans.*',
+                                'detailpesanans.*',
+                                'menus.nama_menu',
+                                'menus.harga_menu'
+                            ]);
     
+        if(count($detailPesanan) > 0){
+            return response([
+                'message' => 'Retrieve Detail Pesanan Success',
+                'data' => $detailPesanan
+            ],200);
+        }
         return response([
-            'message' => 'Retrive All Success',
-            'data' => $detailPesanan
-        ]);
+            'message' => 'Empty',
+            'data' => null
+        ],404);
     }
 
     public function getOne($id)
     {
-        $detailPesanan = DetailPesanan::find($id);
+        $detailPesanan = DB::table('detailpesanans')
+                            ->join('pesanans', 'detailpesanans.id_pesanan', '=', 'pesanans.id')
+                            ->join('menus', 'detailpesanans.id_menu', '=', 'menu.id')
+                            ->where('detailpesanans.is_Deleted','=','0')
+                            ->where('detailpesanans.id', '=', $id)
+                            ->get([
+                                'pesanans.*',
+                                'detailpesanans.*',
+                                'menus.nama_menu',
+                                'menus.harga_menu'
+                            ]);
 
+        if(!is_null($detailPesanan)){
+            return response([
+                'message' => 'Retrieve Detail Pesanan Success',
+                'data' => $detailPesanan
+            ],200);
+        }
         return response([
-            'message' => 'Retrive Detail Pesanan Success',
-            'data' => $detailPesanan
-        ]);
+            'message' => 'Empty',
+            'data' => null
+        ],404);
     }
 
     public function store(Request $request)
@@ -58,7 +87,7 @@ class DetailPesananController extends Controller
         return response([
             'message' => 'Add Detail Pesanan Succes',
             'data' => $detailPesanan,
-        ]);
+        ],200);
     }
 
     public function update(Request $request, $id)
@@ -92,7 +121,7 @@ class DetailPesananController extends Controller
         return response([
             'message' => 'Update Detail Pesanan Success',
             'data' => $detailPesanan,
-        ]);
+        ],200);
     }
 
     public function delete($id)
@@ -111,7 +140,7 @@ class DetailPesananController extends Controller
         return response([
             'message' => 'Delete Detail Pesanan Succes',
             'data' => $detailPesanan,
-        ]);
+        ],200);
     }
 
     public function restore($id)
@@ -130,6 +159,6 @@ class DetailPesananController extends Controller
         return response([
             'message' => 'Restore Detail Pesanan Succes',
             'data' => $detailPesanan,
-        ]);
+        ],200);
     }
 }

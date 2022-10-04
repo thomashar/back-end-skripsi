@@ -10,7 +10,7 @@ class Stok extends Model
 {
     protected $fillable = [
         'nama_stok', 'jumlah_masuk_stok', 'satuan_stok',
-        'tanggal_masuk_stok', 'harga_stok',
+        'tanggal_masuk_stok', 'harga_stok', 'tanggal_kadaluarsa',
         'is_Deleted'
     ];
     

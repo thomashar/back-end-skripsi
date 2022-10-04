@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-use App\Stok;
+use App\Models\Stok;
 use Validator;
 
 class StokController extends Controller
@@ -16,32 +16,51 @@ class StokController extends Controller
         $stok = DB::table('stoks')
                     ->where('is_Deleted','LIKE','0')
                     ->get();
+        
+        if(count($stok) > 0){
+            return response([
+                'message' => 'Retrieve All Success',
+                'data' => $stok
+            ],200);
+        }
         return response([
-            'message' => 'Retrive All Success',
-            'data' => $stok
-        ]);
+            'message' => 'Empty',
+            'data' => null
+        ],404);
     }
 
-    public function getDeleted($is_Deleted)
+    public function getDeleted()
     {
-        $stok = Stok::where('is_Deleted', $is_Deleted)
-                          ->where('is_Deleted', 'LIKE', '1')
-                          ->get();
+        $stok = DB::table('stoks')
+                        ->where('is_Deleted', 'LIKE', '1')
+                        ->get();
 
+        if(count($stok) > 0){
+            return response([
+                'message' => 'Retrieve Deleted Success',
+                'data' => $stok
+            ],200);
+        }
         return response([
-            'message' => 'Retrive Deleted Success',
-            'data' => $stok
-        ]);
+            'message' => 'Empty',
+            'data' => null
+        ],404);
     }
 
     public function getOne($id)
     {
         $stok = Stok::find($id);
 
+        if(!is_null($stok)){
+            return response([
+                'message' => 'Retrieve All Success',
+                'data' => $stok
+            ],200);
+        }
         return response([
-            'message' => 'Retrive Stok Success',
-            'data' => $stok
-        ]);
+            'message' => 'Stok Not Found',
+            'data' => null
+        ],404);
     }
 
     public function store(Request $request)
@@ -52,7 +71,8 @@ class StokController extends Controller
             'jumlah_masuk_stok' => 'required|numeric',
             'satuan_stok' => 'required',
             'tanggal_masuk_stok' => 'required|date_format:Y-m-d',
-            'harga_stok' => 'required|numeric'
+            'harga_stok' => 'required|numeric',
+            'tanggal_kadaluarsa' => 'required|date_format:Y-m-d'
         ]);
 
         if ($validate->fails()) {
@@ -65,13 +85,14 @@ class StokController extends Controller
         $stok->satuan_stok          = $storeData['satuan_stok'];
         $stok->tanggal_masuk_stok   = $storeData['tanggal_masuk_stok'];
         $stok->harga_stok           = $storeData['harga_stok'];
+        $stok->tanggal_kadaluarsa   = $storeData['tanggal_kadaluarsa'];
         
         $stok->save();
 
         return response([
             'message' => 'Add Stok Succes',
             'data' => $stok,
-        ]);
+        ],200);
     }
 
     public function update(Request $request, $id)
@@ -90,7 +111,8 @@ class StokController extends Controller
             'jumlah_masuk_stok' => 'required|numeric',
             'satuan_stok' => 'required',
             'tanggal_masuk_stok' => 'required|date_format:Y-m-d',
-            'harga_stok' => 'required|numeric'
+            'harga_stok' => 'required|numeric',
+            'tanggal_kadaluarsa' => 'required|date_format:Y-m-d'
         ]);
 
         if ($validate->fails()) {
@@ -102,12 +124,13 @@ class StokController extends Controller
         $stok->satuan_stok          = $updateData['satuan_stok'];
         $stok->tanggal_masuk_stok   = $updateData['tanggal_masuk_stok'];
         $stok->harga_stok           = $updateData['harga_stok'];
+        $stok->tanggal_kadaluarsa   = $updateData['tanggal_kadaluarsa'];
 
         $stok->save();
         return response([
             'message' => 'Update Stok Success',
             'data' => $stok,
-        ]);
+        ],200);
     }
 
     public function delete($id)
@@ -126,7 +149,7 @@ class StokController extends Controller
         return response([
             'message' => 'Delete Stok Succes',
             'data' => $stok,
-        ]);
+        ],200);
     }
 
     public function restore($id)
@@ -145,6 +168,6 @@ class StokController extends Controller
         return response([
             'message' => 'Restore Stok Succes',
             'data' => $stok,
-        ]);
+        ],200);
     }
 }

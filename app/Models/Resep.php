@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
-class Menu extends Model
+class reseps extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'nama_menu', 'harga_menu', 'foto_menu', 'deskripsi_menu',
-        'jenis_menu', 'is_Deleted'
+        'jumlah_resep', 'id_menu', 'is_Deleted'
     ];
     
     public function getCreatedAtAttribute()

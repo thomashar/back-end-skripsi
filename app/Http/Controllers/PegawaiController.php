@@ -15,12 +15,23 @@ class PegawaiController extends Controller
     {
         $pegawai = Pegawai::where('is_Deleted','LIKE', '0')
                         ->get();
-        /*
-            1=pemilik
-            2=admin
-            3=kasir
-            4=pegawai
-        */
+
+        if(count($pegawai) > 0){
+            return response([
+                'message' => 'Retrieve All Success',
+                'data' => $pegawai
+            ],200);
+        } //return data semua pegawai dalam bentuk json
+        return response([
+            'message' => 'Empty',
+            'data' => null
+        ],404); //return message data pegawai kosong
+    }
+
+    public function getPegawaiMendaftar()
+    {
+        $pegawai = Pegawai::where('status_pegawai','LIKE', '2')
+                        ->get();
 
         if(count($pegawai) > 0){
             return response([
@@ -46,14 +57,57 @@ class PegawaiController extends Controller
     //     ]);
     // }
 
+    public function getDeleted()
+    {
+        $pegawai = DB::table('pegawais')
+                        ->where('is_Deleted', 'LIKE', '1')
+                        ->get();
+
+        if(count($pegawai) > 0){
+            return response([
+                'message' => 'Retrieve Deleted Success',
+                'data' => $pegawai
+            ],200);
+        }
+        return response([
+            'message' => 'Empty',
+            'data' => null
+        ],404);
+    }
+
     public function getOne($id)
     {
         $pegawai = Pegawai::find($id);
 
+        if(!is_null($pegawai)){
+            return response([
+                'message' => 'Retrieve Pegawai Success',
+                'data' => $pegawai
+            ],200);
+        }
         return response([
-            'message' => 'Retrive Pegawai Success',
+            'message' => 'Empty',
+            'data' => null
+        ],404);
+    }
+
+    public function getByName($name)
+    {
+        $pegawai = DB::table('pegawais')
+                    ->where('nama_pegawai', 'LIKE', '%'.$name.'%')            
+                    ->get(); 
+    
+        if(!is_null($pegawai)) {
+            return response([
+            'message' => 'Retrieve Pegawai Success',
             'data' => $pegawai
-        ]);
+            ],200);
+        } 
+
+        return response([
+            'message' => 'Pegawai Not Found',
+            'data' => null
+        ],404);
     }
 
     public function store(Request $request)
@@ -63,7 +117,7 @@ class PegawaiController extends Controller
             'nama_pegawai' => 'required|max:60|regex:/^[\pL\s]+$/u',
             'jenis_kelamin' => 'required',
             'hp_pegawai' => 'required|numeric|digits_between:10,13|starts_with:08',
-            'id_role' => 'required',
+            'jabatan_pegawai' => 'required',
             'alamat_pegawai' => 'required',
             'foto_pegawai' => 'nullable|file|image',
             'email_pegawai' => 'required|email:rfc,dns|unique:pegawais',
@@ -77,7 +131,7 @@ class PegawaiController extends Controller
         if (!is_null($request->file('foto_pegawai'))) {
             $file          = $request->file('foto_pegawai');
             $nama_file     = time() . "_" . $file->getClientOriginalName();
-            $tujuan_upload = 'data_pegawai';
+            $tujuan_upload = 'pegawai_picture';
             $file->move($tujuan_upload, $nama_file);
         } else {
             $nama_file = 'avatar.png';
@@ -87,7 +141,7 @@ class PegawaiController extends Controller
         $pegawai->nama_pegawai              = $storeData['nama_pegawai'];
         $pegawai->jenis_kelamin             = $storeData['jenis_kelamin'];
         $pegawai->hp_pegawai                = $storeData['hp_pegawai'];
-        $pegawai->id_role                   = $storeData['id_role'];
+        $pegawai->jabatan_pegawai           = $storeData['jabatan_pegawai'];
         $pegawai->foto_pegawai              = $nama_file;
         $pegawai->email_pegawai             = $storeData['email_pegawai'];
         $pegawai->password                  = bcrypt($request->password);
@@ -97,10 +151,48 @@ class PegawaiController extends Controller
         return response([
             'message' => 'Add Pegawai Succes',
             'data' => $pegawai,
-        ]);
+        ],200);
     }
 
-    public function update(Request $request, $id)
+    public function saveFoto(Request $request, $id) 
+    {
+        $pegawai = Pegawai::find($id);
+        if (is_null($pegawai)) {
+            return response([
+                'message' => 'Pegawai Not Found',
+                'data' => null
+            ], 404);
+        }
+
+        $updateData = $request->all();
+        $validate = Validator::make($updateData, [
+            'foto_pegawai' => 'nullable|file'
+        ]);
+
+        if ($validate->fails()) {
+            return response(['message' => $validate->errors()], 400);
+        }
+
+        if (!is_null($request->file('foto_pegawai'))) {
+            $file          = $request->file('foto_pegawai');
+            // $file          = str_replace(' ', '_', $file);
+            $tujuan_upload = 'pegawai_picture';
+
+            $nama_file     = $tujuan_upload . '/' . time() . "_" . $file->getClientOriginalName();
+            
+            $file->move($tujuan_upload, $nama_file);
+
+            $pegawai->foto_pegawai     = $nama_file;
+        }
+
+        $pegawai->save();
+        return response([
+            'message' => 'Update Pegawai Success',
+            'data' => $pegawai,
+        ],200);
+    }
+
+    public function updateNoPass(Request $request, $id)
     {
         $pegawai = Pegawai::find($id);
         if (is_null($pegawai)) {
@@ -115,8 +207,44 @@ class PegawaiController extends Controller
             'nama_pegawai' => 'max:60|regex:/^[\pL\s]+$/u',
             'jenis_kelamin' => '',
             'hp_pegawai' => 'numeric|digits_between:10,13|starts_with:08',
-            'id_role' => '',
-            'foto_pegawai' => 'nullable|file|image',
+            'jabatan_pegawai' => '',
+            'email_pegawai' => ['email:rfc,dns', Rule::unique('pegawais')->ignore($pegawai)]
+        ]);
+
+        if ($validate->fails()) {
+            return response(['message' => $validate->errors()], 400);
+        }
+
+        $pegawai->nama_pegawai              = $updateData['nama_pegawai'];
+        $pegawai->jenis_kelamin             = $updateData['jenis_kelamin'];
+        $pegawai->hp_pegawai                = $updateData['hp_pegawai'];
+        $pegawai->jabatan_pegawai           = $updateData['jabatan_pegawai'];
+        $pegawai->email_pegawai             = $updateData['email_pegawai'];
+        $pegawai->password                  = bcrypt($updateData['password']);
+
+        $pegawai->save();
+        return response([
+            'message' => 'Update Pegawai Success',
+            'data' => $pegawai,
+        ],200);
+    }
+
+    public function updateAll(Request $request, $id)
+    {
+        $pegawai = Pegawai::find($id);
+        if (is_null($pegawai)) {
+            return response([
+                'message' => 'Pegawai Not Found',
+                'data' => null
+            ], 404);
+        }
+
+        $updateData = $request->all();
+        $validate = Validator::make($updateData, [
+            'nama_pegawai' => 'max:60|regex:/^[\pL\s]+$/u',
+            'jenis_kelamin' => '',
+            'hp_pegawai' => 'numeric|digits_between:10,13|starts_with:08',
+            'jabatan_pegawai' => '',
             'email_pegawai' => ['email:rfc,dns', Rule::unique('pegawais')->ignore($pegawai)],
             'password' => ''
         ]);
@@ -125,19 +253,10 @@ class PegawaiController extends Controller
             return response(['message' => $validate->errors()], 400);
         }
 
-        if (!is_null($request->file('foto_pegawai'))) {
-            $file          = $request->file('foto_pegawai');
-            $nama_file     = time() . "_" . $file->getClientOriginalName();
-            $tujuan_upload = 'data_pegawai';
-            $file->move($tujuan_upload, $nama_file);
-
-            $pegawai->foto_pegawai     = $nama_file;
-        }
-
         $pegawai->nama_pegawai              = $updateData['nama_pegawai'];
         $pegawai->jenis_kelamin             = $updateData['jenis_kelamin'];
         $pegawai->hp_pegawai                = $updateData['hp_pegawai'];
-        $pegawai->id_role                   = $updateData['id_role'];
+        $pegawai->jabatan_pegawai           = $updateData['jabatan_pegawai'];
         $pegawai->email_pegawai             = $updateData['email_pegawai'];
         $pegawai->password                  = bcrypt($updateData['password']);
 
@@ -145,7 +264,7 @@ class PegawaiController extends Controller
         return response([
             'message' => 'Update Pegawai Success',
             'data' => $pegawai,
-        ]);
+        ],200);
     }
 
     // public function updateAccount(Request $request, $id)
@@ -186,8 +305,9 @@ class PegawaiController extends Controller
         return response([
             'message' => 'Update Status Pegawai Success',
             'data' => $pegawai,
-        ]);
+        ],200);
     }    
+
     public function delete($id)
     {
         $pegawai = Pegawai::find($id);
@@ -198,7 +318,7 @@ class PegawaiController extends Controller
         return response([
             'message' => 'Delete Pegawai Succes',
             'data' => $pegawai,
-        ]);
+        ],200);
     }
 
     public function restore($id)
@@ -211,7 +331,7 @@ class PegawaiController extends Controller
         return response([
             'message' => 'Restore Pegawai Succes',
             'data' => $pegawai,
-        ]);
+        ],200);
     }
 
 

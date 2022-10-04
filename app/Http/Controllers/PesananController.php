@@ -6,30 +6,47 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-use App\Pesanan;
+use App\Models\Pesanan;
 use Validator;
 
 class PesananController extends Controller
 {
-    public function get()
+    public function getAll()
     {
         $pesanan = DB::table('pesanans')
-                        ->where('is_Deleted','LIKE','0')
-                        ->get();
+                        ->join('detailpesanans', 'pesanans.id', '=', 'detailpesanans.id_pesanan')
+                        ->where('pesanans.is_Deleted','LIKE','0')
+                        ->get([
+                            'pesanans.*',
+                            'detailpesanans.*'
+                        ]);
         return response([
             'message' => 'Retrive All Success',
             'data' => $pesanan
-        ]);
+        ],200);
     }
 
     public function getOne($id)
     {
-        $pesanan = Pesanan::find($id);
+        $pesanan = DB::table('pesanans')
+                        ->join('detailpesanans', 'pesanans.id', '=', 'detailpesanans.id_pesanan')
+                        ->where('pesanans.is_Deleted','LIKE',$id)
+                        ->get([
+                            'pesanans.*',
+                            'detailpesanans.*'
+                        ]);
 
+        if(!is_null($pesanan)){
+            return response([
+                'message' => 'Retrieve Pesanan Success',
+                'data' => $pesanan
+            ],200);
+        }
         return response([
-            'message' => 'Retrive Pesanan Success',
-            'data' => $pesanan
-        ]);
+            'message' => 'Empty',
+            'data' => null
+        ],404);
+
     }
 
     public function store(Request $request)
@@ -55,7 +72,7 @@ class PesananController extends Controller
         return response([
             'message' => 'Add Pesanan Succes',
             'data' => $pesanan,
-        ]);
+        ],200);
     }
 
     public function update(Request $request, $id)
@@ -87,7 +104,7 @@ class PesananController extends Controller
         return response([
             'message' => 'Update Pesanan Success',
             'data' => $pesanan,
-        ]);
+        ],200);
     }
 
     public function updateStatus(Request $request, $id)
@@ -110,7 +127,7 @@ class PesananController extends Controller
         return response([
             'message' => 'Update Status Pesanan Success',
             'data' => $pesanan,
-        ]);
+        ],200);
     }
 
     public function delete($id)
@@ -129,7 +146,7 @@ class PesananController extends Controller
         return response([
             'message' => 'Delete Pesanan Succes',
             'data' => $pesanan,
-        ]);
+        ],200);
     }
 
     public function restore($id)
@@ -148,6 +165,6 @@ class PesananController extends Controller
         return response([
             'message' => 'Restore Pesanan Succes',
             'data' => $pesanan,
-        ]);
+        ],200);
     }
 }

@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-use App\Pembeli;
+use App\Models\Pembeli;
 use Validator;
 
 class PembeliController extends Controller
@@ -17,38 +17,73 @@ class PembeliController extends Controller
                         ->where('is_Deleted','LIKE','0')
                         ->get();
 
+        if(count($pembeli) > 0){
+            return response([
+                'message' => 'Retrieve All Success',
+                'data' => $pembeli
+            ],200);
+        }
         return response([
-            'message' => 'Retrive All Success',
-            'data' => $pembeli
-        ]);
+            'message' => 'Empty',
+            'data' => null
+        ],404);
+    }
+
+    public function getDeleted()
+    {
+        $pembeli = DB::table('pembelis')
+                        ->where('is_Deleted', 'LIKE', '1')
+                        ->get();
+
+        if(count($pembeli) > 0){
+            return response([
+                'message' => 'Retrieve Deleted Success',
+                'data' => $pembeli
+            ],200);
+        }
+        return response([
+            'message' => 'Empty',
+            'data' => null
+        ],404);
     }
 
     public function getAll()
     {
         $pembeli = Pembeli::get();
 
+        if(count($pembeli) > 0){
+            return response([
+                'message' => 'Retrieve All Success',
+                'data' => $pembeli
+            ],200);
+        }
         return response([
-            'message' => 'Retrive All Success',
-           'data' => $pembeli
-        ]);
+            'message' => 'Empty',
+            'data' => null
+        ],404);
     }
 
     public function getOne($id)
     {
         $pembeli = Pembeli::find($id);
 
+        if(!is_null($pembeli)){
+            return response([
+                'message' => 'Retrieve Pembeli Success',
+                'data' => $pembeli
+            ],200);
+        }
         return response([
-            'message' => 'Retrive Pembeli Success',
-            'data' => $pembeli
-        ]);
+            'message' => 'Empty',
+            'data' => null
+        ],404);
     }
 
     public function store(Request $request)
     {
         $storeData = $request->all();
         $validate = Validator::make($storeData, [
-            'nama_pembeli' => 'required|max:60|unique:pembelis',
-            'email_pembeli' => 'nullable|email:rfc,dns',
+            'nama_pembeli' => 'required|max:60|unique:pembelis'
         ]);
 
         if ($validate->fails()){
@@ -57,12 +92,11 @@ class PembeliController extends Controller
 
         $pembeli = new Pembeli();
         $pembeli->nama_pembeli     = $storeData['nama_pembeli'];
-        $pembeli->email_pembeli    = $storeData['email_pembeli'];
 
         $pembeli->save();
 
         return response([
-            'message' => 'Add Pembeli Succes',
+            'message' => 'Add Pembeli Success',
             'data' => $pembeli
         ], 200);
     }
@@ -79,8 +113,7 @@ class PembeliController extends Controller
 
         $updateData = $request->all();
         $validate = Validator::make($updateData, [
-            'nama_pembeli' => ['max:60', Rule::unique('pembelis')->ignore($pembeli)],
-            'email_pembeli' => 'nullable|email:rfc,dns'
+            'nama_pembeli' => ['max:60', Rule::unique('pembelis')->ignore($pembeli)]
         ]);
 
         if ($validate->fails()){
@@ -88,13 +121,12 @@ class PembeliController extends Controller
         }
 
         $pembeli->nama_pembeli    = $updateData['nama_pembeli'];
-        $pembeli->email_pembeli   = $updateData['email_pembeli'];
 
         $pembeli->save();
         return response([
-            'message' => 'Update Pembeli Succes',
+            'message' => 'Update Pembeli Success',
             'data' => $pembeli,
-        ]);
+        ],200);
     }
 
     public function delete($id)
@@ -113,7 +145,7 @@ class PembeliController extends Controller
         return response([
             'message' => 'Delete Pembeli Succes',
             'data' => $pembeli,
-        ]);
+        ],200);
     }
 
     public function restore($id)
@@ -132,7 +164,7 @@ class PembeliController extends Controller
         return response([
             'message' => 'Restore Pembeli Succes',
             'data' => $pembeli,
-        ]);
+        ],200);
     }
 
     public function destroy($id)
@@ -143,7 +175,7 @@ class PembeliController extends Controller
         return response([
             'message' => 'Delete Pembeli Succes',
             'data' => $pembeli,
-        ]);
+        ],200);
     }
 
 }

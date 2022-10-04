@@ -4,6 +4,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PembeliController;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\StokController;
+use App\Http\Controllers\PesananController;
+use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\DetailPesananController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\HistoryStokController;
+use App\Http\Controllers\ResepController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -19,61 +30,89 @@ use App\Http\Controllers\RoleController;
 //     return $request->user();
 // });
 
-// Route::post('register','PegawaiController@store');
-// Route::post('login','AuthController@login');
+Route::get('/customer', [MenuController::class, 'getAll']);
+Route::get('/customer/search={name}', [MenuController::class, 'getByName']);
 
-// // Route::group(['middleware' => 'auth:api'], function () {
-//     Route::post('logout','AuthController@logout');
+Route::post('/register', [PegawaiController::class, 'store']);
+Route::post('/login', [AuthController::class, 'login']);
 
-//     Route::get('pegawai','PegawaiController@getAll');
-//     Route::get('pegawai/{id}','PegawaiController@getOne');
-//     Route::post('pegawai','PegawaiController@store');
-//     Route::put('pegawai/{id}','PegawaiController@update');
-//     Route::put('pegawai/{id}','PegawaiController@updateStatus');
-//     Route::put('pegawai/{id}','PegawaiController@delete');
-//     Route::put('pegawai/{id}','PegawaiController@restore');
+Route::group(['middleware' => 'auth:api'], function () {
+    // Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('profile/{id}',[AuthController::class, 'show']);
 
-//     Route::get('role','RoleController@get');
-//     Route::get('role/{id}','RoleController@getOne');
-//     Route::post('role','RoleController@store');
-//     Route::put('role/{id}','RoleController@update');
-//     Route::put('role/{id}','RoleController@delete');
-//     Route::put('role/{id}','RoleController@restore');
+    Route::get('/pegawai', [PegawaiController::class, 'getAll']);
+    Route::get('/pegawaiMendaftar', [PegawaiController::class, 'getPegawaiMendaftar']);
+    Route::get('/pegawai/{id}', [PegawaiController::class, 'getOne']);
+    Route::get('/pegawaiByName/{name}', [PegawaiController::class, 'getByName']);
+    Route::post('/pegawai', [PegawaiController::class, 'store']);
+    Route::post('/pegawai/selfFoto/{id}', [PegawaiController::class, 'saveFoto']);
+    Route::put('/pegawai/self/{id}', [PegawaiController::class, 'updateAll']);
+    Route::put('/pegawai/selfNoPass/{id}', [PegawaiController::class, 'updateNoPass']);
+    Route::put('/pegawai/status/{id}', [PegawaiController::class, 'updateStatus']);
+    Route::put('/pegawai/softDelete/{id}', [PegawaiController::class, 'delete']);
+    Route::put('/pegawai/restore/{id}', [PegawaiController::class, 'restore']);
 
-//     Route::get('menu','MenuController@get');
-//     Route::get('menu/{id}','MenuController@getOne');
-//     Route::post('menu','MenuController@store');
-//     Route::put('menu/{id}','MenuController@update');
-//     Route::put('menu/{id}','MenuController@delete');
-//     Route::put('menu/{id}','MenuController@restore');
+    Route::get('/menu', [MenuController::class, 'getAll']);
+    Route::get('/menuNotDeleted', [MenuController::class, 'getNotDeleted']);
+    Route::get('/menuDeleted', [MenuController::class, 'getDeleted']);
+    Route::get('/menu/{id}', [MenuController::class, 'getOne']);
+    Route::get('/menuByName/{name}', [MenuController::class, 'getByName']);
+    Route::post('/menu', [MenuController::class, 'store']);
+    Route::post('/menu/upimg/{id}', [MenuController::class, 'saveFoto']);
+    Route::put('/menu/{id}', [MenuController::class, 'update']);
+    Route::put('/menu/softDelete/{id}', [MenuController::class, 'delete']);
+    Route::put('/menu/restore/{id}', [MenuController::class, 'restore']);
+    
+    Route::get('/transaksi', [TransaksiController::class, 'getAll']);
+    Route::get('/transaksiByName/{name}', [TransaksiController::class, 'getByName']);
+    Route::get('/transaksi/{id}', [TransaksiController::class, 'getOne']);
+    Route::post('/transaksi', [TransaksiController::class, 'store']);
+    Route::put('/transaksi/{id}', [TransaksiController::class, 'update']);
+    Route::put('/transaksi/softDelete/{id}', [TransaksiController::class, 'delete']);
+    Route::put('/transaksi/restore/{id}', [TransaksiController::class, 'restore']);
 
-//     Route::get('pesanan','PesananController@getAll');
-//     Route::get('pesanan/{id}','PesananController@getOne');
-//     Route::post('pesanan','PesananController@store');
-//     Route::put('pesanan/{id}','PesananController@update');
-//     Route::put('pesanan/{id}','PesananController@updateStatus');
-//     Route::put('pesanan/{id}','PesananController@delete');
-//     Route::put('pesanan/{id}','PesananController@restore');
+    Route::get('/resep', [ResepController::class, 'getAll']);
+    Route::get('/resep/{id}', [ResepController::class, 'getOne']);
+    Route::post('/resep', [ResepController::class, 'store']);
+    Route::put('/resep/{id}', [ResepController::class, 'update']);
+    Route::put('/resep/softDelete/{id}', [ResepController::class, 'delete']);
+    Route::put('/resep/restore/{id}', [ResepController::class, 'restore']);
 
-//     Route::get('stok','StokController@get');
-//     Route::get('stok/{is_Deleted}','PegawaiController@getDeleted');
-//     Route::get('stok/{id}','StokController@getOne');
-//     Route::post('stok','StokController@store');
-//     Route::put('stok/{id}','StokController@update');
-//     Route::put('stok/{id}','StokController@delete');
-//     Route::put('stok/{id}','StokController@restore');
+    Route::get('/pesanan', [PesananController::class, 'getAll']);
+    Route::get('/pesanan/deleted', [StokController::class, 'getDeleted']);
+    Route::get('/pesanan/{id}', [PesananController::class, 'getOne']);
+    Route::post('/pesanan', [PesananController::class, 'store']);
+    Route::put('/pesanan/{id}', [PesananController::class, 'store']);
+    Route::put('/pesanan/status/{id}', [PesananController::class, 'updateStatus']);
+    Route::put('/pesanan/softDelete{id}', [PesananController::class, 'delete']);
+    Route::put('/pesanan/restore/{id}', [PesananController::class, 'restore']);
 
-//     Route::get('pembeli','PembeliController@getAll');
-//     Route::get('pembeli/{id}','PembeliController@getOne');
-//     Route::post('pembeli','PembeliController@store');
-//     Route::put('pembeli/{id}','PembeliController@update');
-//     Route::put('pembeli/{id}','PembeliController@updateStatus');
-//     Route::put('pembeli/{id}','PembeliController@delete');
-//     Route::put('pembeli/{id}','PembeliController@restore');
-//     Route::delete('pembeli/{id}','PembeliController@destroy');
+    // Route::get('/stok', [StokController::class, 'get']);
+    // Route::get('/stok/deleted', [StokController::class, 'getDeleted']);
+    // Route::get('/stok/{id}', [StokController::class, 'getOne']);
+    // Route::post('/stok', [StokController::class, 'store']);
+    // Route::put('/stok/{id}', [StokController::class, 'update']);
+    // Route::put('/stok/softDelete{id}', [StokController::class, 'delete']);
+    // Route::put('/stok/restore/{id}', [StokController::class, 'restore']);
 
-// });
+    Route::get('/historystok', [HistoryStokController::class, 'get']);
+    Route::get('/historystok/deleted', [HistoryStokController::class, 'getDeleted']);
+    Route::get('/historystok/{id}', [HistoryStokController::class, 'getOne']);
+    Route::post('/historystok', [HistoryStokController::class, 'store']);
+    Route::put('/historystok/{id}', [HistoryStokController::class, 'update']);
+    Route::put('/historystok/{nama}', [HistoryStokController::class, 'tambahTotalStok']);
+    Route::put('/historystok/softDelete{id}', [HistoryStokController::class, 'delete']);
+    Route::put('/historystok/restore/{id}', [HistoryStokController::class, 'restore']);
 
+    Route::get('/pembeli', [PembeliController::class, 'getAll']);
+    Route::get('/pembeli/deleted', [StokController::class, 'getDeleted']);
+    Route::get('/pembeli/{id}', [PembeliController::class, 'getOne']);
+    Route::post('/pembeli', [PembeliController::class, 'store']);
+    Route::put('/pembeli/{id}', [PembeliController::class, 'update']);
+    Route::put('/pembeli/status/{id}', [PembeliController::class, 'updateStatus']);
+    Route::put('/pembeli/softDelete{id}', [PembeliController::class, 'delete']);
+    Route::put('/pembeli/restore/{id}', [PembeliController::class, 'restore']);
+    Route::delete('/pembeli/{id}', [PembeliController::class, 'destroy']);
 
-Route::get('/pegawai', [PegawaiController::class, 'getAll']);
-Route::get('/role', [RoleController::class, 'get']);
+});
+

@@ -29,6 +29,6 @@ class TransaksiMail extends Mailable
     public function build()
     {
         return $this->subject('E-Nota Cafe X')
-                    ->view('mail');
+                    ->view('emails.demo');
     }
 }

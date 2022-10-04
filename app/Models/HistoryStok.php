@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
-class Role extends Model
+class HistoryStok extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'nama_role', 'is_Deleted'
+        'nama_stok', 'tanggal_stok', 'jumlah_stok', 'satuan_stok',
+        'tanggal_stok', 'harga_stok', 'is_Deleted', 'id_resep'
     ];
     
     public function getCreatedAtAttribute()

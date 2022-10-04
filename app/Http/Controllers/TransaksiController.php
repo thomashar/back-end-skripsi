@@ -6,41 +6,82 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-use App\Transaksi;
-use App\Pembeli;
-use App\Pesanan;
+use App\Models\Transaksi;
+use App\Models\Pembeli;
+use App\Models\Pesanan;
 use Validator;
-use Mail;
-use App\Mail\TransaksiMail;
 
 class TransaksiController extends Controller
 {
     public function getAll()
     {
         $transaksi = DB::table('transaksis')
-                        ->where('is_Deleted','LIKE','0')
-                        ->get();
+                        ->join('pegawais', 'transaksis.id_pegawai', '=', 'pegawais.id')
+                        ->join('pembelis', 'transaksis.id_pembeli', '=', 'pembelis.id')
+                        ->join('pesanans', 'transaksis.id_pesanan', '=', 'pesanans.id')
+                        ->join('detailpesanans', 'pesanans.id', '=', 'detailpesanans.id_pesanan')
+                        ->join('menus', 'detailpesanans.id_menu', '=', 'menus.id')
+                        ->orderBy('transaksis.status_pembayaran', 'asc')
+                        ->get([
+                            'transaksis.*',
+                            'menus.nama_menu',
+                            'menus.harga_menu',
+                            'pembelis.nama_pembeli',
+                            'pegawais.nama_pegawai',
+                            'detailpesanans.*',
+                            'pesanans.*'
+                        ]);
         return response([
-            'message' => 'Retrive All Success',
+            'message' => 'Retrieve All Success',
             'data' => $transaksi
-        ]);
+        ],200);
+    }
+
+    public function getByName($nama)
+    {
+        $transaksi = DB::table('transaksis')
+                        ->join('pegawais', 'transaksis.id_pegawai', '=', 'pegawais.id')
+                        ->join('pembelis', 'transaksis.id_pembeli', '=', 'pembelis.id')
+                        ->join('pesanans', 'transaksis.id_pesanan', '=', 'pesanans.id')
+                        ->join('detailpesanans', 'pesanans.id', '=', 'detailpesanans.id_pesanan')
+                        ->join('menus', 'detailpesanans.id_menu', '=', 'menus.id')
+                        ->orderBy('transaksis.status_pembayaran', 'LIKE', '0')
+                        ->where('pembelis.nama_pembeli', 'LIKE', '%'.$nama.'%')
+                        ->get([
+                            'transaksis.*',
+                            'menus.nama_menu',
+                            'menus.harga_menu',
+                            'pembelis.nama_pembeli',
+                            'pegawais.nama_pegawai',
+                            'detailpesanans.*',
+                            'pesanans.*'
+                        ]);
+        return response([
+            'message' => 'Retrieve All Success',
+            'data' => $transaksi
+        ],200);
     }
 
     public function getOne($id)
     {
         $transaksi = Transaksi::find($id);
 
+        if(!is_null($transaksi)){
+            return response([
+                'message' => 'Retrieve Transaksi Success',
+                'data' => $transaksi
+            ],200);
+        }
         return response([
-            'message' => 'Retrive Transaksi Success',
-            'data' => $transaksi
-        ]);
+            'message' => 'Empty',
+            'data' => null
+        ],404);
     }
 
     public function store(Request $request)
     {
         $storeData = $request->all();
         $validate = Validator::make($storeData, [
-            'total_bayar' => 'required|numeric',
             'tax' => 'required|numeric',
             'tanggal_transaksi' => 'required|date_format:Y-m-d',
             'status_pembayaran' => 'required',
@@ -54,7 +95,6 @@ class TransaksiController extends Controller
         }
 
         $transaksi = new Transaksi();
-        $transaksi->total_bayar         = $storeData['total_bayar'];
         $transaksi->tax                 = $storeData['tax'];
         $transaksi->tanggal_transaksi   = $storeData['tanggal_transaksi'];
         $transaksi->status_pembayaran   = $storeData['status_pembayaran'];
@@ -67,7 +107,7 @@ class TransaksiController extends Controller
         return response([
             'message' => 'Add Transaksi Succes',
             'data' => $transaksi,
-        ]);
+        ],200);
     }
 
     public function update(Request $request, $id)
@@ -82,7 +122,6 @@ class TransaksiController extends Controller
 
         $updateData = $request->all();
         $validate = Validator::make($updateData, [
-            'total_bayar' => 'numeric',
             'tax' => 'numeric',
             'tanggal_transaksi' => 'date_format:Y-m-d',
             'status_pembayaran' => '',
@@ -95,7 +134,6 @@ class TransaksiController extends Controller
             return response(['message' => $validate->errors()], 400);
         }
 
-        $transaksi->total_bayar         = $updateData['total_bayar'];
         $transaksi->tax                 = $updateData['tax'];
         $transaksi->tanggal_transaksi   = $updateData['tanggal_transaksi'];
         $transaksi->status_pembayaran   = $updateData['status_pembayaran'];
@@ -107,7 +145,7 @@ class TransaksiController extends Controller
         return response([
             'message' => 'Update Transaksi Success',
             'data' => $transaksi,
-        ]);
+        ],200);
     }
 
     public function updateStatus(Request $request, $id)
@@ -128,7 +166,7 @@ class TransaksiController extends Controller
         return response([
             'message' => 'Update Status Transaksi Success',
             'data' => $transaksi,
-        ]);
+        ],200);
     }
 
     public function sendMail($email,$body)
@@ -160,7 +198,7 @@ class TransaksiController extends Controller
         return response([
             'message' => 'Delete Transaksi Succes',
             'data' => $transaksi,
-        ]);
+        ],200);
     }
 
     public function restore($id)
@@ -179,6 +217,6 @@ class TransaksiController extends Controller
         return response([
             'message' => 'Restore Transaksi Succes',
             'data' => $transaksi,
-        ]);
+        ],200);
     }
 }
