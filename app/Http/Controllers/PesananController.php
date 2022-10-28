@@ -15,10 +15,13 @@ class PesananController extends Controller
     {
         $pesanan = DB::table('pesanans')
                         ->join('detailpesanans', 'pesanans.id', '=', 'detailpesanans.id_pesanan')
+                        ->join('menus', 'detailpesanans.id_menu', '=', 'menus.id')
                         ->where('pesanans.is_Deleted','LIKE','0')
                         ->get([
                             'pesanans.*',
-                            'detailpesanans.*'
+                            'detailpesanans.*',
+                            'menus.nama_menu',
+                            'menus.harga_menu'
                         ]);
         return response([
             'message' => 'Retrive All Success',
@@ -30,12 +33,14 @@ class PesananController extends Controller
     {
         $pesanan = DB::table('pesanans')
                         ->join('detailpesanans', 'pesanans.id', '=', 'detailpesanans.id_pesanan')
+                        ->join('menus', 'detailpesanans.id_menu', '=', 'menus.id')
                         ->where('pesanans.is_Deleted','LIKE',$id)
                         ->get([
                             'pesanans.*',
-                            'detailpesanans.*'
+                            'detailpesanans.*',
+                            'menus.nama_menu',
+                            'menus.harga_menu'
                         ]);
-
         if(!is_null($pesanan)){
             return response([
                 'message' => 'Retrieve Pesanan Success',
@@ -46,7 +51,30 @@ class PesananController extends Controller
             'message' => 'Empty',
             'data' => null
         ],404);
+    }
 
+    public function getByName($name)
+    {
+        $pesanan = DB::table('pesanans')
+                        ->join('detailpesanans', 'pesanans.id', '=', 'detailpesanans.id_pesanan')
+                        ->join('menus', 'detailpesanans.id_menu', '=', 'menus.id')
+                        ->where('pesanans.nama_pembeli','LIKE','%'.$name.'%')
+                        ->get([
+                            'pesanans.*',
+                            'detailpesanans.*',
+                            'menus.nama_menu',
+                            'menus.harga_menu'
+                        ]);
+        if(!is_null($pesanan)){
+            return response([
+                'message' => 'Retrieve Pesanan Success',
+                'data' => $pesanan
+            ],200);
+        }
+        return response([
+            'message' => 'Empty',
+            'data' => null
+        ],404);
     }
 
     public function store(Request $request)
@@ -54,8 +82,7 @@ class PesananController extends Controller
         $storeData = $request->all();
         $validate = Validator::make($storeData, [
             'tanggal_pesanan' => 'required|date_format:Y-m-d',
-            'total_harga' => 'required|numeric',
-            'status_pesanan' => 'required'
+            'nama_pembeli' => 'required'
         ]);
 
         if ($validate->fails()) {
@@ -63,9 +90,8 @@ class PesananController extends Controller
         }
 
         $pesanan = new Pesanan();
-        $pesanan->tanggal_pesanan       = $storeData['tanggal_pesanan'];
-        $pesanan->total_harga           = $storeData['total_harga'];
-        $pesanan->status_pesanan        = $storeData['status_pesanan'];
+        $pesanan->tanggal_pesanan      = $storeData['tanggal_pesanan'];
+        $pesanan->nama_pembeli         = $storeData['nama_pembeli'];
         
         $pesanan->save();
 
@@ -88,44 +114,19 @@ class PesananController extends Controller
         $updateData = $request->all();
         $validate = Validator::make($updateData, [
             'tanggal_pesanan' => 'date_format:Y-m-d',
-            'total_harga' => 'numeric',
-            'status_pesanan' => ''
+            'nama_pembeli' => ''
         ]);
 
         if ($validate->fails()) {
             return response(['message' => $validate->errors()], 400);
         }
 
-        $pesanan->tanggal_pesanan       = $updateData['tanggal_pesanan'];
-        $pesanan->total_harga           = $updateData['total_harga'];
-        $pesanan->status_pesanan        = $updateData['status_pesanan'];
+        $pesanan->tanggal_pesanan     = $updateData['tanggal_pesanan'];
+        $pesanan->nama_pembeli        = $updateData['nama_pembeli'];
 
         $pesanan->save();
         return response([
             'message' => 'Update Pesanan Success',
-            'data' => $pesanan,
-        ],200);
-    }
-
-    public function updateStatus(Request $request, $id)
-    {
-        $pesanan = Pesanan::find($id);
-        if (is_null($pesanan)) {
-            return response([
-                'message' => 'Pesanan Not Found',
-                'data' => null
-            ], 404);
-        }
-
-        if ($pesanan->status_pesanan == 1) {
-            $pesanan->status_pesanan = 0;
-        } else if ($pesanan->status_pesanan == 0) {
-            $pesanan->status_pesanan = 1;
-        }
-
-        $pesanan->save();
-        return response([
-            'message' => 'Update Status Pesanan Success',
             'data' => $pesanan,
         ],200);
     }

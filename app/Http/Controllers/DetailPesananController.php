@@ -7,6 +7,7 @@ use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use App\Models\DetailPesanan;
+use App\Models\Pesanan;
 use Validator;
 
 class DetailPesananController extends Controller
@@ -102,10 +103,10 @@ class DetailPesananController extends Controller
 
         $updateData = $request->all();
         $validate = Validator::make($updateData, [
-            'jumlah_menu' => 'required|numeric',
-            'subtotal' => 'required|numeric',
-            'id_pesanan' => 'required',
-            'id_menu' => 'required'
+            'jumlah_menu' => 'numeric',
+            'subtotal' => 'numeric',
+            'id_pesanan' => '',
+            'id_menu' => ''
         ]);
 
         if ($validate->fails()) {

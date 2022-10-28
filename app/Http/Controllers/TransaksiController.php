@@ -16,8 +16,6 @@ class TransaksiController extends Controller
     public function getAll()
     {
         $transaksi = DB::table('transaksis')
-                        ->join('pegawais', 'transaksis.id_pegawai', '=', 'pegawais.id')
-                        ->join('pembelis', 'transaksis.id_pembeli', '=', 'pembelis.id')
                         ->join('pesanans', 'transaksis.id_pesanan', '=', 'pesanans.id')
                         ->join('detailpesanans', 'pesanans.id', '=', 'detailpesanans.id_pesanan')
                         ->join('menus', 'detailpesanans.id_menu', '=', 'menus.id')
@@ -26,8 +24,6 @@ class TransaksiController extends Controller
                             'transaksis.*',
                             'menus.nama_menu',
                             'menus.harga_menu',
-                            'pembelis.nama_pembeli',
-                            'pegawais.nama_pegawai',
                             'detailpesanans.*',
                             'pesanans.*'
                         ]);
@@ -40,19 +36,15 @@ class TransaksiController extends Controller
     public function getByName($nama)
     {
         $transaksi = DB::table('transaksis')
-                        ->join('pegawais', 'transaksis.id_pegawai', '=', 'pegawais.id')
-                        ->join('pembelis', 'transaksis.id_pembeli', '=', 'pembelis.id')
                         ->join('pesanans', 'transaksis.id_pesanan', '=', 'pesanans.id')
                         ->join('detailpesanans', 'pesanans.id', '=', 'detailpesanans.id_pesanan')
                         ->join('menus', 'detailpesanans.id_menu', '=', 'menus.id')
                         ->orderBy('transaksis.status_pembayaran', 'LIKE', '0')
-                        ->where('pembelis.nama_pembeli', 'LIKE', '%'.$nama.'%')
+                        ->where('pesanans.nama_pembeli', 'LIKE', '%'.$nama.'%')
                         ->get([
                             'transaksis.*',
                             'menus.nama_menu',
                             'menus.harga_menu',
-                            'pembelis.nama_pembeli',
-                            'pegawais.nama_pegawai',
                             'detailpesanans.*',
                             'pesanans.*'
                         ]);
@@ -82,11 +74,11 @@ class TransaksiController extends Controller
     {
         $storeData = $request->all();
         $validate = Validator::make($storeData, [
+            'total_harga' => 'required|numeric',
             'tax' => 'required|numeric',
             'tanggal_transaksi' => 'required|date_format:Y-m-d',
             'status_pembayaran' => 'required',
             'id_pegawai' => 'required',
-            'id_pembeli' => 'required',
             'id_pesanan' => 'required'
         ]);
 
@@ -95,17 +87,17 @@ class TransaksiController extends Controller
         }
 
         $transaksi = new Transaksi();
+        $transaksi->total_harga         = $storeData['total_harga'];
         $transaksi->tax                 = $storeData['tax'];
         $transaksi->tanggal_transaksi   = $storeData['tanggal_transaksi'];
         $transaksi->status_pembayaran   = $storeData['status_pembayaran'];
         $transaksi->id_pegawai          = $storeData['id_pegawai'];
-        $transaksi->id_pembeli          = $storeData['id_pembeli'];
         $transaksi->id_pesanan          = $storeData['id_pesanan'];
         
         $transaksi->save();
 
         return response([
-            'message' => 'Add Transaksi Succes',
+            'message' => 'Add Transaksi Success',
             'data' => $transaksi,
         ],200);
     }
@@ -122,11 +114,11 @@ class TransaksiController extends Controller
 
         $updateData = $request->all();
         $validate = Validator::make($updateData, [
+            'total_harga' => 'numeric',
             'tax' => 'numeric',
             'tanggal_transaksi' => 'date_format:Y-m-d',
             'status_pembayaran' => '',
             'id_pegawai' => '',
-            'id_pembeli' => '',
             'id_pesanan' => ''
         ]);
 
@@ -134,11 +126,11 @@ class TransaksiController extends Controller
             return response(['message' => $validate->errors()], 400);
         }
 
+        $transaksi->total_harga         = $updateData['total_harga'];
         $transaksi->tax                 = $updateData['tax'];
         $transaksi->tanggal_transaksi   = $updateData['tanggal_transaksi'];
         $transaksi->status_pembayaran   = $updateData['status_pembayaran'];
         $transaksi->id_pegawai          = $updateData['id_pegawai'];
-        $transaksi->id_pembeli          = $updateData['id_pembeli'];
         $transaksi->id_pesanan          = $updateData['id_pesanan'];
 
         $transaksi->save();
@@ -167,20 +159,7 @@ class TransaksiController extends Controller
             'message' => 'Update Status Transaksi Success',
             'data' => $transaksi,
         ],200);
-    }
-
-    public function sendMail($email,$body)
-    {
-        try{
-            $detail = [
-                'body' => $body,
-            ];
-            Mail::to($email)->send(new TransaksiMail($email));
-        }catch(Exception $e){
-            return redirect()->route('Transaksi.id')->with('success','but email cannot be sent');
-        }
-    }
-        
+    }   
 
     public function delete($id)
     {

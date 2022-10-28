@@ -30,10 +30,10 @@ use App\Http\Controllers\ResepController;
 //     return $request->user();
 // });
 
-Route::get('/customer', [MenuController::class, 'getAll']);
+Route::get('/customer', [MenuController::class, 'getNotDeleted']);
 Route::get('/customer/search={name}', [MenuController::class, 'getByName']);
 
-Route::post('/register', [PegawaiController::class, 'store']);
+Route::post('/register', [AuthController::class, 'store']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::group(['middleware' => 'auth:api'], function () {
@@ -55,6 +55,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/menu', [MenuController::class, 'getAll']);
     Route::get('/menuNotDeleted', [MenuController::class, 'getNotDeleted']);
     Route::get('/menuDeleted', [MenuController::class, 'getDeleted']);
+    Route::get('/countMenu', [MenuController::class, 'countMany']);
     Route::get('/menu/{id}', [MenuController::class, 'getOne']);
     Route::get('/menuByName/{name}', [MenuController::class, 'getByName']);
     Route::post('/menu', [MenuController::class, 'store']);
@@ -71,18 +72,12 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::put('/transaksi/softDelete/{id}', [TransaksiController::class, 'delete']);
     Route::put('/transaksi/restore/{id}', [TransaksiController::class, 'restore']);
 
-    Route::get('/resep', [ResepController::class, 'getAll']);
-    Route::get('/resep/{id}', [ResepController::class, 'getOne']);
-    Route::post('/resep', [ResepController::class, 'store']);
-    Route::put('/resep/{id}', [ResepController::class, 'update']);
-    Route::put('/resep/softDelete/{id}', [ResepController::class, 'delete']);
-    Route::put('/resep/restore/{id}', [ResepController::class, 'restore']);
-
     Route::get('/pesanan', [PesananController::class, 'getAll']);
     Route::get('/pesanan/deleted', [StokController::class, 'getDeleted']);
+    Route::get('/pesananByName/{id}', [PesananController::class, 'getByName']);
     Route::get('/pesanan/{id}', [PesananController::class, 'getOne']);
     Route::post('/pesanan', [PesananController::class, 'store']);
-    Route::put('/pesanan/{id}', [PesananController::class, 'store']);
+    Route::put('/pesanan/{id}', [PesananController::class, 'update']);
     Route::put('/pesanan/status/{id}', [PesananController::class, 'updateStatus']);
     Route::put('/pesanan/softDelete{id}', [PesananController::class, 'delete']);
     Route::put('/pesanan/restore/{id}', [PesananController::class, 'restore']);

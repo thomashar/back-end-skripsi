@@ -66,7 +66,8 @@ class MenuController extends Controller
     public function getByName($name)
     {
         $menu = DB::table('menus')
-                    ->where('nama_menu', 'LIKE', '%'.$name.'%')            
+                    ->where('nama_menu', 'LIKE', '%'.$name.'%')
+                    ->where('is_Deleted', 'LIKE', '0')            
                     ->get(); 
     
         if(!is_null($menu)) {
@@ -82,6 +83,25 @@ class MenuController extends Controller
         ],404);
     }
 
+    public function countMany()
+    {
+        $menu = DB::table('menus')
+                    ->where('is_Deleted', 'LIKE', '0')
+                    ->count(); 
+    
+        if(!is_null($menu)) {
+            return response([
+            'message' => 'Count Menu Success',
+            'data' => $menu
+            ],200);
+        } 
+
+        return response([
+            'message' => 'Menu Not Found',
+            'data' => null
+        ],404);
+    }
+    
     public function getOne($id)
     {
         $menu = Menu::find($id); 

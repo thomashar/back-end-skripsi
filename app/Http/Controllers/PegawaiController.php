@@ -142,6 +142,7 @@ class PegawaiController extends Controller
         $pegawai->jenis_kelamin             = $storeData['jenis_kelamin'];
         $pegawai->hp_pegawai                = $storeData['hp_pegawai'];
         $pegawai->jabatan_pegawai           = $storeData['jabatan_pegawai'];
+        $pegawai->alamat_pegawai            = $storeData['alamat_pegawai'];
         $pegawai->foto_pegawai              = $nama_file;
         $pegawai->email_pegawai             = $storeData['email_pegawai'];
         $pegawai->password                  = bcrypt($request->password);
@@ -207,7 +208,9 @@ class PegawaiController extends Controller
             'nama_pegawai' => 'max:60|regex:/^[\pL\s]+$/u',
             'jenis_kelamin' => '',
             'hp_pegawai' => 'numeric|digits_between:10,13|starts_with:08',
+            'alamat_pegawai' => '',
             'jabatan_pegawai' => '',
+            'status_pegawai' => '1',
             'email_pegawai' => ['email:rfc,dns', Rule::unique('pegawais')->ignore($pegawai)]
         ]);
 
@@ -218,9 +221,10 @@ class PegawaiController extends Controller
         $pegawai->nama_pegawai              = $updateData['nama_pegawai'];
         $pegawai->jenis_kelamin             = $updateData['jenis_kelamin'];
         $pegawai->hp_pegawai                = $updateData['hp_pegawai'];
+        $pegawai->alamat_pegawai            = $updateData['alamat_pegawai'];
         $pegawai->jabatan_pegawai           = $updateData['jabatan_pegawai'];
+        $pegawai->status_pegawai            = $updateData['status_pegawai'];
         $pegawai->email_pegawai             = $updateData['email_pegawai'];
-        $pegawai->password                  = bcrypt($updateData['password']);
 
         $pegawai->save();
         return response([
@@ -245,6 +249,7 @@ class PegawaiController extends Controller
             'jenis_kelamin' => '',
             'hp_pegawai' => 'numeric|digits_between:10,13|starts_with:08',
             'jabatan_pegawai' => '',
+            'status_pegawai' => '1',
             'email_pegawai' => ['email:rfc,dns', Rule::unique('pegawais')->ignore($pegawai)],
             'password' => ''
         ]);
@@ -258,6 +263,7 @@ class PegawaiController extends Controller
         $pegawai->hp_pegawai                = $updateData['hp_pegawai'];
         $pegawai->jabatan_pegawai           = $updateData['jabatan_pegawai'];
         $pegawai->email_pegawai             = $updateData['email_pegawai'];
+        $pegawai->status_pegawai            = $updateData['status_pegawai'];
         $pegawai->password                  = bcrypt($updateData['password']);
 
         $pegawai->save();

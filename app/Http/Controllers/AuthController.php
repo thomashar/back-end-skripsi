@@ -64,6 +64,10 @@ class AuthController extends Controller
             return response([
                 'message' => 'Akun Anda Telah Di Nonaktifkan',
             ], 401);
+        } else if ($pegawai->status_pegawai == 2) {
+            return response([
+                'message' => 'Akun Anda Belum Di Aktifkan',
+            ], 401);
         } else {
             $token = $pegawai->createToken('Authentication Token')->accessToken;
 

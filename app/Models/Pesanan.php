@@ -9,7 +9,7 @@ use Carbon\Carbon;
 class Pesanan extends Model
 {
     protected $fillable = [
-        'tanggal_pesanan', 'total_harga', 'status_pembayaran', 
+        'tanggal_pesanan', 'nama_pembeli', 'status_pesanan', 
         'is_Deleted'
     ];
     
