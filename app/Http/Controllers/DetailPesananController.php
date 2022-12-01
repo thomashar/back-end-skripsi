@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\DetailPesanan;
 use App\Models\Pesanan;
 use Validator;
+use GuzzleHttp\Client;
 
 class DetailPesananController extends Controller
 {
@@ -63,31 +64,45 @@ class DetailPesananController extends Controller
         ],404);
     }
 
+    public function getDetailPesanan ($id_pesanan)
+    {    
+        $detailPesanan = DB::table('detailpesanans')
+                            ->join('pesanans', 'detailpesanans.id_pesanan', '=', 'pesanans.id')
+                            ->join('menus', 'detailpesanans.id_menu', '=', 'menu.id')
+                            ->where('detailpesanans.is_Deleted','=', $id_pesanan)
+                            ->get([
+                                'pesanans.*',
+                                'detailpesanans.*',
+                                'menus.nama_menu',
+                                'menus.harga_menu'
+                            ]);
+
+        $hasil = json_encode($detailPesanan, true);
+        $hasil['method']=$method;
+
+        return response([
+            'message' => 'Retrive Product Success',
+            'data' => $hasil
+        ], 200);
+    }
+
     public function store(Request $request)
-    {
-        $storeData = $request->all();
-        $validate = Validator::make($storeData, [
-            'jumlah_menu' => 'required|numeric',
-            'subtotal' => 'required|numeric',
-            'id_pesanan' => 'required',
-            'id_menu' => 'required'
-        ]);
+    {       
+        $hasil = json_decode($request->data, true);
 
-        if ($validate->fails()) {
-            return response(['message' => $validate->errors()], 400);
+        for ($x = 0; $x < sizeof($hasil); $x+=3) {
+    
+            $detailPesanan = new DetailPesanan();
+            $detailPesanan->jumlah_menu    = $hasil[$x];
+            $detailPesanan->id_pesanan     = $hasil[$x+1];
+            $detailPesanan->id_menu        = $hasil[$x+2];
+            
+            $detailPesanan->save();
         }
-
-        $detailPesanan = new DetailPesanan();
-        $detailPesanan->jumlah_menu    = $storeData['jumlah_menu'];
-        $detailPesanan->subtotal       = $storeData['subtotal'];
-        $detailPesanan->id_pesanan     = $storeData['id_pesanan'];
-        $detailPesanan->id_menu        = $storeData['id_menu'];
-        
-        $detailPesanan->save();
 
         return response([
             'message' => 'Add Detail Pesanan Succes',
-            'data' => $detailPesanan,
+            'data' => null,
         ],200);
     }
 
@@ -104,7 +119,6 @@ class DetailPesananController extends Controller
         $updateData = $request->all();
         $validate = Validator::make($updateData, [
             'jumlah_menu' => 'numeric',
-            'subtotal' => 'numeric',
             'id_pesanan' => '',
             'id_menu' => ''
         ]);
@@ -114,7 +128,6 @@ class DetailPesananController extends Controller
         }
 
         $detailPesanan->jumlah_menu    = $updateData['jumlah_menu'];
-        $detailPesanan->subtotal       = $updateData['subtotal'];
         $detailPesanan->id_pesanan     = $updateData['id_pesanan'];
         $detailPesanan->id_menu        = $updateData['id_menu'];
 

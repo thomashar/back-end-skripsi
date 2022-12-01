@@ -8,8 +8,9 @@ use Carbon\Carbon;
 
 class DetailPesanan extends Model
 {
+    protected $table = 'detailpesanans';
     protected $fillable = [
-        'jumlah_menu', 'subtotal', 'is_Deleted', 'id_pesanan', 'id_menu'
+        'jumlah_menu', 'is_Deleted', 'id_pesanan', 'id_menu'
     ];
     
     public function getCreatedAtAttribute()

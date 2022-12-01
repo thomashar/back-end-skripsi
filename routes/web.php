@@ -19,4 +19,3 @@ Route::get('/', function () {
 });
 
 Route::resource('fotoMenu', 'App\Http\Controllers\MenuController');
-Route::get('send-email', [SendEmailController::class, 'index']);

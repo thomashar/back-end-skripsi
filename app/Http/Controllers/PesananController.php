@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use App\Models\Pesanan;
 use Validator;
+use Carbon\Carbon;
 
 class PesananController extends Controller
 {
@@ -29,12 +30,24 @@ class PesananController extends Controller
         ],200);
     }
 
+    public function getPesanan()
+    {
+        $currentDate = Carbon::now();
+        $pesanan = DB::table('pesanans')
+                        ->where('tanggal_pesanan', 'LIKE', $currentDate->toDateString())
+                        ->get();
+        return response([
+            'message' => 'Retrive All Success',
+            'data' => $pesanan
+        ],200);
+    }
+
     public function getOne($id)
     {
         $pesanan = DB::table('pesanans')
                         ->join('detailpesanans', 'pesanans.id', '=', 'detailpesanans.id_pesanan')
                         ->join('menus', 'detailpesanans.id_menu', '=', 'menus.id')
-                        ->where('pesanans.is_Deleted','LIKE',$id)
+                        ->where('pesanans.id','=',$id)
                         ->get([
                             'pesanans.*',
                             'detailpesanans.*',
@@ -81,7 +94,7 @@ class PesananController extends Controller
     {
         $storeData = $request->all();
         $validate = Validator::make($storeData, [
-            'tanggal_pesanan' => 'required|date_format:Y-m-d',
+            'subtotal' => 'required',
             'nama_pembeli' => 'required'
         ]);
 
@@ -90,7 +103,7 @@ class PesananController extends Controller
         }
 
         $pesanan = new Pesanan();
-        $pesanan->tanggal_pesanan      = $storeData['tanggal_pesanan'];
+        $pesanan->subtotal             = $storeData['subtotal'];
         $pesanan->nama_pembeli         = $storeData['nama_pembeli'];
         
         $pesanan->save();
@@ -114,6 +127,7 @@ class PesananController extends Controller
         $updateData = $request->all();
         $validate = Validator::make($updateData, [
             'tanggal_pesanan' => 'date_format:Y-m-d',
+            'subtotal' => '',
             'nama_pembeli' => ''
         ]);
 
@@ -122,6 +136,7 @@ class PesananController extends Controller
         }
 
         $pesanan->tanggal_pesanan     = $updateData['tanggal_pesanan'];
+        $pesanan->subtotal            = $updateData['subtotal'];
         $pesanan->nama_pembeli        = $updateData['nama_pembeli'];
 
         $pesanan->save();
