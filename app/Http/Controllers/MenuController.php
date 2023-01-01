@@ -199,7 +199,7 @@ class MenuController extends Controller
         ],200);
     }
 
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
         $menu = Menu::find($id);
         if (is_null($menu)) {
@@ -210,32 +210,21 @@ class MenuController extends Controller
         }
 
         $updateData = $request->all();
-        $validate = Validator::make($updateData, [
-            'nama_role' => 'max:60',
-            'harga_menu' => 'numeric',
-            'foto_menu' => 'nullable',
-            'deskripsi_menu' => '',
-            'jenis_menu' => ''
-        ]);
+        // $validate = Validator::make($updateData, [
+        //     'nama_menu' => '',
+        //     'harga_menu' => 'numeric',
+        //     'deskripsi_menu' => '',
+        //     'jenis_menu' => ''
+        // ]);
 
-        if ($validate->fails()) {
-            return response(['message' => $validate->errors()], 400);
-        }
-
-        if (!is_null($request->file('foto_menu'))) {
-            $file          = $request->file('foto_menu');
-            $nama_file     = time() . "_" . $file->getClientOriginalName();
-            $tujuan_upload = 'menu_picture';
-            $file->move($tujuan_upload, $nama_file);
-
-            $menu->foto_menu     = $nama_file;
-        }
-
-        $menu->nama_menu        = $updateData['nama_role'];
-        $menu->harga_menu       = $updateData['harga_menu'];
-        $menu->foto_menu        = $nama_file;
-        $menu->deskripsi_menu   = $updateData['deskripsi_menu'];
-        $menu->jenis_menu       = $updateData['jenis_menu'];
+        // if ($validate->fails()) {
+        //     return response(['message' => $validate->errors()], 400);
+        // }
+        $x = 0;
+        $menu->nama_menu        = $updateData[$x];
+        $menu->harga_menu       = $updateData[$x+1];
+        $menu->deskripsi_menu   = $updateData[$x+2];
+        $menu->jenis_menu       = $updateData[$x+3];
 
         $menu->save();
 

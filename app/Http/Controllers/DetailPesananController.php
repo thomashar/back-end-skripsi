@@ -101,7 +101,7 @@ class DetailPesananController extends Controller
         }
 
         return response([
-            'message' => 'Add Detail Pesanan Succes',
+            'message' => 'Add Detail Pesanan Success',
             'data' => null,
         ],200);
     }
@@ -117,19 +117,8 @@ class DetailPesananController extends Controller
         }
 
         $updateData = $request->all();
-        $validate = Validator::make($updateData, [
-            'jumlah_menu' => 'numeric',
-            'id_pesanan' => '',
-            'id_menu' => ''
-        ]);
-
-        if ($validate->fails()) {
-            return response(['message' => $validate->errors()], 400);
-        }
 
         $detailPesanan->jumlah_menu    = $updateData['jumlah_menu'];
-        $detailPesanan->id_pesanan     = $updateData['id_pesanan'];
-        $detailPesanan->id_menu        = $updateData['id_menu'];
 
         $detailPesanan->save();
         return response([

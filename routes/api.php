@@ -75,21 +75,24 @@ Route::group(['middleware' => 'auth:api'], function () {
     
     Route::get('/transaksi', [TransaksiController::class, 'getAll']);
     Route::get('/transaksiByName/{name}', [TransaksiController::class, 'getByName']);
-    Route::get('/transaksi/{id}', [TransaksiController::class, 'getOne']);
+    Route::get('/transaksi/{id_pesanan}', [TransaksiController::class, 'getOne']);
     Route::post('/transaksi', [TransaksiController::class, 'store']);
-    Route::put('/transaksi/{id}', [TransaksiController::class, 'update']);
+    Route::post('/transaksi/{id}', [TransaksiController::class, 'update']);
     Route::put('/transaksiDone/{id}/{id_pegawai}', [TransaksiController::class, 'updateStatus']);
     Route::put('/transaksi/softDelete/{id}', [TransaksiController::class, 'delete']);
     Route::put('/transaksi/restore/{id}', [TransaksiController::class, 'restore']);
 
+    Route::post('/tambahDetailPesanan', [DetailPesananController::class, 'store']);
     Route::get('/getDetailPesanan/{id_pesanan}', [DetailPesananController::class, 'getDetailPesanan']);
+    Route::post('/detailPesanan/{id}', [DetailPesananController::class, 'update']);
+    Route::put('/detailPesanan/softDelete/{id}', [DetailPesananController::class, 'delete']);
 
     Route::get('/pesanan', [PesananController::class, 'getAll']);
     Route::get('/pesanan/deleted', [StokController::class, 'getDeleted']);
     Route::get('/pesananByName/{id}', [PesananController::class, 'getByName']);
     Route::get('/pesanan/{id}', [PesananController::class, 'getOne']);
     Route::post('/pesanan', [PesananController::class, 'store']);
-    Route::put('/pesanan/{id}', [PesananController::class, 'update']);
+    Route::post('/pesanan/{id}', [PesananController::class, 'update']);
     Route::put('/pesanan/status/{id}', [PesananController::class, 'updateStatus']);
     Route::put('/pesanan/softDelete{id}', [PesananController::class, 'delete']);
     Route::put('/pesanan/restore/{id}', [PesananController::class, 'restore']);

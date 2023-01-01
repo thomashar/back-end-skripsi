@@ -47,7 +47,8 @@ class PesananController extends Controller
         $pesanan = DB::table('pesanans')
                         ->join('detailpesanans', 'pesanans.id', '=', 'detailpesanans.id_pesanan')
                         ->join('menus', 'detailpesanans.id_menu', '=', 'menus.id')
-                        ->where('pesanans.id','=',$id)
+                        ->where('pesanans.id', '=',$id)
+                        ->where('detailpesanans.is_Deleted', '=', '0')
                         ->get([
                             'pesanans.*',
                             'detailpesanans.*',
@@ -125,17 +126,7 @@ class PesananController extends Controller
         }
 
         $updateData = $request->all();
-        $validate = Validator::make($updateData, [
-            'tanggal_pesanan' => 'date_format:Y-m-d',
-            'subtotal' => '',
-            'nama_pembeli' => ''
-        ]);
 
-        if ($validate->fails()) {
-            return response(['message' => $validate->errors()], 400);
-        }
-
-        $pesanan->tanggal_pesanan     = $updateData['tanggal_pesanan'];
         $pesanan->subtotal            = $updateData['subtotal'];
         $pesanan->nama_pembeli        = $updateData['nama_pembeli'];
 

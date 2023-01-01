@@ -20,6 +20,8 @@ class TransaksiController extends Controller
                         ->join('pesanans', 'transaksis.id_pesanan', '=', 'pesanans.id')
                         ->orderBy('transaksis.status_pembayaran', 'asc')
                         ->get([
+                            'transaksis.id AS id_transaksi',
+                            'transaksis.is_Deleted AS is_Deleted_transaksi',
                             'transaksis.*',
                             'pesanans.*'
                         ]);
@@ -50,7 +52,7 @@ class TransaksiController extends Controller
         ],200);
     }
 
-    public function getByTanggalAndIdPesanan($id_pesanan)
+    public function getOne($id_pesanan)
     {
         $currentDate = Carbon::now();
         $transaksi = DB::table('transaksis')
@@ -58,6 +60,7 @@ class TransaksiController extends Controller
                         ->orderBy('transaksis.status_pembayaran', 'asc')
                         ->where('transaksis.id_pesanan', 'LIKE', $id_pesanan)
                         ->get([
+                            'transaksis.id AS id_transaksi',
                             'transaksis.*',
                             'pesanans.*'
                         ]);
@@ -67,21 +70,21 @@ class TransaksiController extends Controller
         ],200);
     }
 
-    public function getOne($id)
-    {
-        $transaksi = Transaksi::find($id);
+    // public function getOne($id)
+    // {
+    //     $transaksi = Transaksi::find($id);
 
-        if(!is_null($transaksi)){
-            return response([
-                'message' => 'Retrieve Transaksi Success',
-                'data' => $transaksi
-            ],200);
-        }
-        return response([
-            'message' => 'Empty',
-            'data' => null
-        ],404);
-    }
+    //     if(!is_null($transaksi)){
+    //         return response([
+    //             'message' => 'Retrieve Transaksi Success',
+    //             'data' => $transaksi
+    //         ],200);
+    //     }
+    //     return response([
+    //         'message' => 'Empty',
+    //         'data' => null
+    //     ],404);
+    // }
 
     public function store(Request $request)
     {
@@ -118,23 +121,9 @@ class TransaksiController extends Controller
         }
 
         $updateData = $request->all();
-        $validate = Validator::make($updateData, [
-            'total_harga' => 'numeric',
-            'tanggal_transaksi' => 'date_format:Y-m-d',
-            'status_pembayaran' => '',
-            'id_pegawai' => '',
-            'id_pesanan' => ''
-        ]);
-
-        if ($validate->fails()) {
-            return response(['message' => $validate->errors()], 400);
-        }
 
         $transaksi->total_harga         = $updateData['total_harga'];
         $transaksi->tanggal_transaksi   = $updateData['tanggal_transaksi'];
-        $transaksi->status_pembayaran   = $updateData['status_pembayaran'];
-        $transaksi->id_pegawai          = $updateData['id_pegawai'];
-        $transaksi->id_pesanan          = $updateData['id_pesanan'];
 
         $transaksi->save();
         return response([

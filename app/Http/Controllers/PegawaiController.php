@@ -210,7 +210,7 @@ class PegawaiController extends Controller
             'hp_pegawai' => 'numeric|digits_between:10,13|starts_with:08',
             'alamat_pegawai' => '',
             'jabatan_pegawai' => '',
-            'status_pegawai' => '1',
+            'status_pegawai' => '',
             'email_pegawai' => ['email:rfc,dns', Rule::unique('pegawais')->ignore($pegawai)]
         ]);
 
@@ -223,7 +223,7 @@ class PegawaiController extends Controller
         $pegawai->hp_pegawai                = $updateData['hp_pegawai'];
         $pegawai->alamat_pegawai            = $updateData['alamat_pegawai'];
         $pegawai->jabatan_pegawai           = $updateData['jabatan_pegawai'];
-        $pegawai->status_pegawai            = $updateData['status_pegawai'];
+        $pegawai->status_pegawai            = '1';
         $pegawai->email_pegawai             = $updateData['email_pegawai'];
 
         $pegawai->save();
@@ -301,10 +301,12 @@ class PegawaiController extends Controller
     {
         $pegawai = Pegawai::find($id);
 
-        if ($pegawai->status_pegawai == 1) {
-            $pegawai->status_pegawai = 0;
+        if ($pegawai->status_pegawai == 2) {
+            $pegawai->status_pegawai = 1;
         } else if ($pegawai->status_pegawai == 0) {
             $pegawai->status_pegawai = 1;
+        } else if ($pegawai->status_pegawai == 1) {
+            $pegawai->status_pegawai = 0;
         }
 
         $pegawai->save();

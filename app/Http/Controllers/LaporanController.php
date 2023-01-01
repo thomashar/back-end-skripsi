@@ -28,6 +28,7 @@ class LaporanController extends Controller
                     ->select(DB::raw('sum(total_harga) as Pendapatan'))
                     ->whereMonth('tanggal_transaksi', $bulan)
                     ->where('status_pembayaran', '=', '1')
+                    ->where('is_deleted', '=', '0')
                     ->get();
         
         $pdf = PDF::loadview('pendapatanBulanan',['pendapatan'=>$laporan[0]->Pendapatan]);
@@ -41,6 +42,7 @@ class LaporanController extends Controller
             SUM(total_harga) AS Jumlah
             FROM transaksis
             WHERE status_pembayaran = 1
+            AND t.is_Deleted = 0
             AND YEAR(tanggal_transaksi) = $tahun
             "
         );
@@ -58,6 +60,7 @@ class LaporanController extends Controller
                 join transaksis t on t.id_pesanan = p.id
                 join menus m on dp.id_menu = m.id
             WHERE t.status_pembayaran = 1
+            AND t.is_Deleted = 0
             AND MONTH(t.tanggal_transaksi) = $bulan
             GROUP BY m.nama_menu,m.harga_menu
             "
@@ -67,6 +70,7 @@ class LaporanController extends Controller
                     ->select(DB::raw('sum(total_harga) as Pendapatan'))
                     ->whereMonth('tanggal_transaksi', $bulan)
                     ->where('status_pembayaran', '=', '1')
+                    ->where('is_Deleted', '=', '0')
                     ->get();
 
         $pdf = PDF::loadview('pendapatanBulanan',['penjualan'=>$penjualanBulan,'pendapatan'=>$laporan[0]->Pendapatan]);
@@ -85,6 +89,7 @@ class LaporanController extends Controller
                 join transaksis t on t.id_pesanan = p.id
                 join menus m on dp.id_menu = m.id
             WHERE t.status_pembayaran = 1
+            AND t.is_Deleted = 0
             AND YEAR(t.tanggal_transaksi) = $tahun
             GROUP BY m.nama_menu, m.harga_menu, Bulan
             "
@@ -96,6 +101,7 @@ class LaporanController extends Controller
             SUM(total_harga) AS Total
             FROM transaksis
             WHERE status_pembayaran = 1
+            AND is_Deleted = 0
             GROUP BY Bulan
             "
         );
@@ -105,6 +111,7 @@ class LaporanController extends Controller
             SUM(total_harga) AS Jumlah
             FROM transaksis
             WHERE status_pembayaran = 1
+            AND is_Deleted = 0
             AND YEAR(tanggal_transaksi) = $tahun
             "
         );
