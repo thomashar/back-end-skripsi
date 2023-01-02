@@ -40,7 +40,7 @@ Route::post('/simpanPesanan', [PesananController::class, 'store']);
 Route::post('/detailPesanan', [DetailPesananController::class, 'store']);
 
 Route::post('/simpanTransaksi', [TransaksiController::class, 'store']);
-Route::get('/getTransaksi/{id_pesanan}', [TransaksiController::class, 'getByTanggalAndIdPesanan']);
+Route::get('/getTransaksi/{id_pesanan}', [TransaksiController::class, 'getOne']);
 
 Route::post('/register', [AuthController::class, 'store']);
 Route::post('/login', [AuthController::class, 'login']);

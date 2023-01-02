@@ -54,7 +54,6 @@ class TransaksiController extends Controller
 
     public function getOne($id_pesanan)
     {
-        $currentDate = Carbon::now();
         $transaksi = DB::table('transaksis')
                         ->join('pesanans', 'transaksis.id_pesanan', '=', 'pesanans.id')
                         ->orderBy('transaksis.status_pembayaran', 'asc')
@@ -70,22 +69,6 @@ class TransaksiController extends Controller
         ],200);
     }
 
-    // public function getOne($id)
-    // {
-    //     $transaksi = Transaksi::find($id);
-
-    //     if(!is_null($transaksi)){
-    //         return response([
-    //             'message' => 'Retrieve Transaksi Success',
-    //             'data' => $transaksi
-    //         ],200);
-    //     }
-    //     return response([
-    //         'message' => 'Empty',
-    //         'data' => null
-    //     ],404);
-    // }
-
     public function store(Request $request)
     {
         $storeData = $request->all();
@@ -98,7 +81,9 @@ class TransaksiController extends Controller
             return response(['message' => $validate->errors()], 400);
         }
 
+        $now = Carbon::now();
         $transaksi = new Transaksi();
+        $transaksi->tanggal_transaksi   = $now;
         $transaksi->total_harga         = $storeData['total_harga'];
         $transaksi->id_pesanan          = $storeData['id_pesanan'];
         

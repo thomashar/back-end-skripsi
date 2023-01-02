@@ -102,8 +102,10 @@ class PesananController extends Controller
         if ($validate->fails()) {
             return response(['message' => $validate->errors()], 400);
         }
-
+        
+        $now = Carbon::now();
         $pesanan = new Pesanan();
+        $pesanan->tanggal_pesanan      = $now;
         $pesanan->subtotal             = $storeData['subtotal'];
         $pesanan->nama_pembeli         = $storeData['nama_pembeli'];
         
